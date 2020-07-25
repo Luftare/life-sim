@@ -1,3 +1,16 @@
+const generatePurchaseItemActions = () =>
+  items
+    .filter((item) => item.isPurchasable)
+    .map((item) => ({
+      key: `purchase-item-${item.key}`,
+      duration: units.minutes(1),
+      energyPerHour: units.calories(20),
+      mutations: [
+        mutators.receiveMoney(-item.cost),
+        mutators.receiveItem(item),
+      ],
+    }));
+
 const actions = [
   {
     key: ACTION_COLLECT_BOTTLES,
@@ -11,6 +24,7 @@ const actions = [
     energyPerHour: units.calories(5),
     mutations: [],
   },
+  ...generatePurchaseItemActions(),
 ];
 
 const dynamicActions = {
@@ -40,7 +54,7 @@ const dynamicActions = {
   sellItem: (item) => (state) => {
     return {
       key: ACTION_SELL_ITEM,
-      duration: units.minutes(2),
+      duration: units.minutes(1),
       energyPerHour: units.calories(20),
       mutations: [mutators.receiveMoney(item.value), mutators.removeItem(item)],
     };

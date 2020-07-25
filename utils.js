@@ -19,3 +19,9 @@ const formats = {
     return `${pad(hours)}:${pad(minutes)}`;
   },
 };
+
+const cloneItem = (item) => ({
+  ...item,
+  id: generateId(),
+});
+const getItem = (key) => items.find((i) => i.key === key);

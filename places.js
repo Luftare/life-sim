@@ -7,6 +7,9 @@ const places = [
   {
     key: PLACE_SHOP,
     coordinates: [units.kilometers(0), units.kilometers(5)],
-    actions: [ACTION_BUY_ITEM, ACTION_SELL_ITEM],
+    actions: [
+      ACTION_SELL_ITEM,
+      ...generatePurchaseItemActions().map((a) => a.key),
+    ],
   },
 ];

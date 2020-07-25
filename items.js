@@ -1,9 +1,3 @@
-const cloneItem = (item) => ({
-  ...item,
-  id: generateId(),
-});
-const getItem = (key) => items.find((i) => i.key === key);
-
 const items = [
   {
     key: ITEM_BANANA,

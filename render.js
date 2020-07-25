@@ -20,18 +20,20 @@ const renderStats = (state) => {
 };
 
 const renderTravelOptions = (state) => {
+  const getText = getTranslations(state.language);
+
   const placesToTravel = places.filter((place) => place !== state.place);
 
   const optionsHTML = placesToTravel
     .map(
       (place) => `
-  <button id="travel-to-${place.key}">${place.key}</button>
+  <button id="travel-to-${place.key}">${getText(place.key)}</button>
 `
     )
     .join('');
 
   DOM.travelOptions.innerHTML = `
-    <h4>Travel to</h4>
+    <h4>${getText('travel')}</h4>
     ${optionsHTML}
   `;
 
@@ -45,21 +47,29 @@ const renderTravelOptions = (state) => {
 };
 
 const renderActions = (state) => {
-  console.log(state);
   const getText = getTranslations(state.language);
   const enabledActions = state.place.actions
     .map((key) => actions.find((action) => action.key === key))
     .filter(Boolean);
 
+  const buttonText = (action) => {
+    if (action.key.includes('purchase-item-')) {
+      const itemkey = action.key.split('purchase-item-')[1];
+      return `${getText('buy')} ${getText(itemkey)}`;
+    } else {
+      return getText(action.key);
+    }
+  };
+
   const optionsHTML = enabledActions
     .map(
       (action) => `
-      <button id="action-${action.key}">${getText(action.key)}</button>`
+      <button id="action-${action.key}">${buttonText(action)}</button>`
     )
     .join('');
 
   DOM.actionsContainer.innerHTML = `
-    <h4>Actions</h4>
+    <h4>${getText('actions')}</h4>
     ${optionsHTML}
   `;
 
@@ -71,10 +81,12 @@ const renderActions = (state) => {
 };
 
 const renderInventory = (state) => {
+  const getText = getTranslations(state.language);
+
   const buttonText = (item) => {
-    if (item.isConsumable) return 'consume';
-    if (item.isSellable) return 'sell';
-    return 'use';
+    if (item.isConsumable) return getText('consume');
+    if (item.isSellable) return getText('sell');
+    return getText('use');
   };
 
   const isActivateable = (item) => {
@@ -89,7 +101,7 @@ const renderInventory = (state) => {
     .map(
       (item, index) => `
     <div>
-      <span>${item.key}</span>
+      <span>${getText(item.key)}</span>
       <button id="inventory-item-${item.key}-${index}" ${
         isActivateable(item) ? '' : 'disabled'
       }>${buttonText(item)}</button>
@@ -99,7 +111,7 @@ const renderInventory = (state) => {
     .join('');
 
   DOM.inventory.innerHTML = `
-    <h4>Inventory</h4>
+    <h4>${getText('inventory')}</h4>
     ${itemsHTML}
   `;
 
