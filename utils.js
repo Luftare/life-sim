@@ -33,3 +33,19 @@ const on = (eventName, handler) => {
   });
   return attr;
 };
+
+const getStomachCalories = (state) => (action) => {
+  return state.stomach.reduce((totalCalories, item) => {
+    const consumableEndTime = item.startTime + item.duration;
+    const consumableRemainingDuration = Math.max(
+      0,
+      consumableEndTime - state.time
+    );
+    const effectiveDuration = Math.min(
+      action.duration,
+      consumableRemainingDuration
+    );
+
+    return totalCalories + (effectiveDuration / item.duration) * item.calories;
+  }, 0);
+};

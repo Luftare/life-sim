@@ -20,21 +20,7 @@ const mutators = {
   processStomach: (action) => (state) => {
     const actionEndTime = state.time + action.duration;
 
-    const totalCalories = state.stomach.reduce((totalCalories, item) => {
-      const consumableEndTime = item.startTime + item.duration;
-      const consumableRemainingDuration = Math.max(
-        0,
-        consumableEndTime - state.time
-      );
-      const effectiveDuration = Math.min(
-        action.duration,
-        consumableRemainingDuration
-      );
-
-      return (
-        totalCalories + (effectiveDuration / item.duration) * item.calories
-      );
-    }, 0);
+    const totalCalories = getStomachCalories(state)(action);
 
     state.energy += totalCalories;
     state.energy = Math.min(150, state.energy);
