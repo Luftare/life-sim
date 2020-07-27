@@ -27,7 +27,9 @@ const renderTravelOptions = (state) => {
   const optionsHTML = placesToTravel
     .map(
       (place) => `
-  <button id="travel-to-${place.key}">${getText(place.key)}</button>
+  <button ${on('click', () =>
+    processAction(state)(dynamicActions.walkTo(place)(state))
+  )}>${getText(place.key)}</button>
 `
     )
     .join('');
@@ -36,14 +38,6 @@ const renderTravelOptions = (state) => {
     <h4>${getText('travel')}</h4>
     ${optionsHTML}
   `;
-
-  placesToTravel.forEach((place) => {
-    const action = dynamicActions.walkTo(place)(state);
-
-    document
-      .getElementById(`travel-to-${place.key}`)
-      .addEventListener('click', () => processAction(state)(action));
-  });
 };
 
 const renderActions = (state) => {
@@ -64,7 +58,9 @@ const renderActions = (state) => {
   const optionsHTML = enabledActions
     .map(
       (action) => `
-      <button id="action-${action.key}">${buttonText(action)}</button>`
+      <button ${on('click', () => processAction(state)(action))}>${buttonText(
+        action
+      )}</button>`
     )
     .join('');
 
@@ -72,12 +68,6 @@ const renderActions = (state) => {
     <h4>${getText('actions')}</h4>
     ${optionsHTML}
   `;
-
-  enabledActions.forEach((action) => {
-    document
-      .getElementById(`action-${action.key}`)
-      .addEventListener('click', () => processAction(state)(action));
-  });
 };
 
 const renderInventory = (state) => {
@@ -97,12 +87,17 @@ const renderInventory = (state) => {
     return true;
   };
 
+  const createAction = (item) => {
+    if (item.isConsumable) return dynamicActions.consumeItem(item)(state);
+    if (item.isSellable) return dynamicActions.sellItem(item)(state);
+  };
+
   const itemsHTML = state.inventory
     .map(
-      (item, index) => `
+      (item) => `
     <div>
       <span>${getText(item.key)}</span>
-      <button id="inventory-item-${item.key}-${index}" ${
+      <button ${on('click', () => processAction(state)(createAction(item)))} ${
         isActivateable(item) ? '' : 'disabled'
       }>${buttonText(item)}</button>
     </div>
@@ -114,19 +109,6 @@ const renderInventory = (state) => {
     <h4>${getText('inventory')}</h4>
     ${itemsHTML}
   `;
-
-  const createAction = (item) => {
-    if (item.isConsumable) return dynamicActions.consumeItem(item)(state);
-    if (item.isSellable) return dynamicActions.sellItem(item)(state);
-  };
-
-  state.inventory.forEach((item, index) => {
-    const action = createAction(item);
-
-    document
-      .getElementById(`inventory-item-${item.key}-${index}`)
-      .addEventListener('click', () => processAction(state)(action));
-  });
 };
 
 const render = (state) =>

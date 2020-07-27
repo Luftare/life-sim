@@ -25,3 +25,11 @@ const cloneItem = (item) => ({
   id: generateId(),
 });
 const getItem = (key) => items.find((i) => i.key === key);
+
+const on = (eventName, handler) => {
+  const attr = 'data-' + Math.floor(Math.random() * 9999999999);
+  requestAnimationFrame(() => {
+    document.querySelector(`[${attr}]`).addEventListener(eventName, handler);
+  });
+  return attr;
+};
