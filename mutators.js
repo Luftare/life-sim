@@ -20,17 +20,17 @@ const mutators = {
   processStomach: (action) => (state) => {
     const actionEndTime = state.time + action.duration;
 
-    const totalCalories = getStomachCalories(state)(action);
+    const receivedCalories = getReceivedCaloriesForDuration(state)(action.duration);
 
-    state.energy += totalCalories;
-    state.energy = Math.min(150, state.energy);
+    state.energy = Math.min(300, state.energy + receivedCalories);
 
     state.stomach = state.stomach.filter(
-      (item) => item.startTime + item.duration > actionEndTime
+      (item) => item.startTime + item.digestDuration > actionEndTime
     );
   },
   advanceDynamicProperties: (action) => (state) => {
-    state.energy -= action.energyPerHour * units.toHours(action.duration);
+    state.energy -= action.power * action.duration;
+    state.mentalRecovery += (action.mentalRecovery || IDLE_MENTAL_RECOVERY_DRAIN) * action.duration;
   },
   setPlace: (place) => (state) => (state.place = place),
 };

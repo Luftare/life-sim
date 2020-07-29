@@ -11,6 +11,7 @@ const renderStats = (state) => {
     <div>
       <h2>${getText(state.place.key)}</h2>
       <div>money: ${state.money.toFixed(2)}€</div>
+      <div>mental recovery: ${formats.percent(state.mentalRecovery)}</div>
       <div>energy: ${state.energy.toFixed(0)} cal</div>
       <div>stomach: ${state.stomach.length}</div>
       <div>day: ${formats.date(state.time)}</div>
@@ -22,14 +23,14 @@ const renderStats = (state) => {
 const renderTravelOptions = (state) => {
   const getText = getTranslations(state.language);
 
-  const placesToTravel = places.filter((place) => place !== state.place);
+  const travelActions = getTravelActions(state);
 
-  const optionsHTML = placesToTravel
+  const optionsHTML = travelActions
     .map(
-      (place) => `
-  <button ${on('click', () =>
-    processAction(state)(dynamicActions.walkTo(place)(state))
-  )}>${getText(place.key)}</button>
+      (action) => `
+      <button ${on('click', () =>
+        processAction(state)(action)
+      )}>${getText(action.place.key)}</button>
 `
     )
     .join('');
@@ -37,78 +38,60 @@ const renderTravelOptions = (state) => {
   DOM.travelOptions.innerHTML = `
     <h4>${getText('travel')}</h4>
     ${optionsHTML}
-  `;
+      `;
 };
 
 const renderActions = (state) => {
   const getText = getTranslations(state.language);
-  const enabledActions = state.place.actions
-    .map((key) => actions.find((action) => action.key === key))
-    .filter(Boolean);
 
   const buttonText = (action) => {
-    if (action.key.includes('purchase-item-')) {
-      const itemkey = action.key.split('purchase-item-')[1];
-      return `${getText('buy')} ${getText(itemkey)}`;
-    } else {
-      return getText(action.key);
-    }
+    return getText(action.key) || action.key;
   };
 
-  const optionsHTML = enabledActions
+  const actions = getActions(state).filter(action => action.enabledAt.includes(state.place.key));
+
+  const optionsHTML = actions
     .map(
       (action) => `
-      <button ${on('click', () => processAction(state)(action))}>${buttonText(
-        action
-      )}</button>`
+    <button
+      ${on('click', () => {
+        processAction(state)(action);
+      })}
+      >${buttonText(action)}</button >`
     )
     .join('');
 
   DOM.actionsContainer.innerHTML = `
-    <h4>${getText('actions')}</h4>
-    ${optionsHTML}
-  `;
+  <h4> ${getText('actions')}</h4>
+  ${optionsHTML}
+`;
 };
 
 const renderInventory = (state) => {
   const getText = getTranslations(state.language);
 
-  const buttonText = (item) => {
-    if (item.isConsumable) return getText('consume');
-    if (item.isSellable) return getText('sell');
-    return getText('use');
-  };
+  const itemActionCreators = getItemActionCreators(state);
 
-  const isActivateable = (item) => {
-    if (item.isSellable && !state.place.actions.includes(ACTION_SELL_ITEM)) {
-      return false;
-    }
-
-    return true;
-  };
-
-  const createAction = (item) => {
-    if (item.isConsumable) return dynamicActions.consumeItem(item)(state);
-    if (item.isSellable) return dynamicActions.sellItem(item)(state);
-  };
+  const getItemActions = item => item.actions.map(({ key, ...rest }) => ({
+    ...itemActionCreators.find(a => a.key === key).create(item),
+    ...rest,
+  })).filter(action => action.enabledAt.includes(state.place.key));
 
   const itemsHTML = state.inventory
+    .map(item => [item, getItemActions(item)])
     .map(
-      (item) => `
-    <div>
-      <span>${getText(item.key)}</span>
-      <button ${on('click', () => processAction(state)(createAction(item)))} ${
-        isActivateable(item) ? '' : 'disabled'
-      }>${buttonText(item)}</button>
-    </div>
-  `
-    )
-    .join('');
+      ([item, actions]) => `
+  <div>
+    <span>${getText(item.key)}</span>
+${actions.map(action => `
+      <button ${on('click', () => processAction(state)(action))} >${getText(action.textKey || action.key)}</button>
+    `).join('')}
+  </div >
+    `).join('');
 
   DOM.inventory.innerHTML = `
-    <h4>${getText('inventory')}</h4>
-    ${itemsHTML}
-  `;
+  <h4> ${getText('inventory')}</h4>
+  ${itemsHTML}`;
 };
 
 const render = (state) =>

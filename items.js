@@ -2,17 +2,18 @@ const items = [
   {
     key: ITEM_BANANA,
     cost: 0.75,
-    isPurchasable: true,
-    isSellable: false,
-    isConsumable: true,
-    duration: units.hours(2),
+    digestDuration: units.hours(3),
     calories: units.calories(105),
+    actions: [{
+      key: ITEM_ACTION_CONSUME
+    }],
   },
   {
     key: ITEM_BOTTLE,
-    isPurchasable: false,
-    isSellable: true,
-    isConsumable: false,
     value: 0.2,
+    actions: [{
+      key: ITEM_ACTION_SELL,
+      textKey: TEXT_RETURN,
+    }],
   },
 ];

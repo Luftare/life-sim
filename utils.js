@@ -9,6 +9,7 @@ let globalIdCounter = 1;
 const generateId = () => globalIdCounter++;
 
 const formats = {
+  percent: val => (val * 100).toFixed(1) + '%',
   date: (time) => {
     const days = Math.floor(time / (1000 * 60 * 60 * 24));
     return days;
@@ -25,6 +26,7 @@ const cloneItem = (item) => ({
   id: generateId(),
 });
 const getItem = (key) => items.find((i) => i.key === key);
+const createItem = key => cloneItem(getItem(key));
 
 const on = (eventName, handler) => {
   const attr = 'data-' + Math.floor(Math.random() * 9999999999);
@@ -34,18 +36,22 @@ const on = (eventName, handler) => {
   return attr;
 };
 
-const getStomachCalories = (state) => (action) => {
+const getReceivedCaloriesForDuration = (state) => (duration) => {
   return state.stomach.reduce((totalCalories, item) => {
-    const consumableEndTime = item.startTime + item.duration;
-    const consumableRemainingDuration = Math.max(
-      0,
-      consumableEndTime - state.time
-    );
-    const effectiveDuration = Math.min(
-      action.duration,
-      consumableRemainingDuration
-    );
+    const itemEndTime = item.startTime + item.digestDuration;
+    const startY = 2 * item.calories / item.digestDuration;
 
-    return totalCalories + (effectiveDuration / item.duration) * item.calories;
+    const actionStartTime = state.time;
+    const actionEndTime = Math.min(itemEndTime, actionStartTime + duration);
+    const effectiveDuration = actionEndTime - actionStartTime;
+    const actionHalfDuration = effectiveDuration * 0.5;
+    const timeSinceItemStart = Math.min(state.time - item.startTime, item.digestDuration);
+    const itemHalfTime = Math.min(timeSinceItemStart + actionHalfDuration, itemEndTime);
+    const factor = -startY / item.digestDuration;
+    const itemHalfTimeY = itemHalfTime * factor + startY;
+
+    const addedCalories = actionHalfDuration * itemHalfTimeY;
+
+    return addedCalories + totalCalories;
   }, 0);
 };

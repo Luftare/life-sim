@@ -6,6 +6,6 @@ const units = {
   meters: (value) => value,
   kilometers: (value) => value * units.meters(1000),
   calories: (value) => value,
-
+  caloriesPerHour: value => units.calories(value) / units.hours(1),
   toHours: (value) => value / (1000 * 60 * 60),
 };
