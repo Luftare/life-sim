@@ -17,10 +17,3 @@ const TEXT_RETURN = 'return';
 const WALK_SPEED_KM_H = units.kilometers(8);
 const IDLE_MENTAL_RECOVERY_DRAIN = -(1 / 16) / units.hours(1);
 const SLEEP_MENTAL_RECOVERY = -IDLE_MENTAL_RECOVERY_DRAIN * 2;
-
-const DOM = {
-  actionsContainer: document.getElementById('actions-container'),
-  statsContainer: document.getElementById('stats-container'),
-  travelOptions: document.getElementById('travel-options'),
-  inventory: document.getElementById('inventory'),
-};

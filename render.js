@@ -1,13 +1,7 @@
 const renderStats = (state) => {
   const getText = getTranslations(state.language);
 
-  const DOM = {
-    actionsContainer: document.getElementById('actions-container'),
-    statsContainer: document.getElementById('stats-container'),
-    travelOptions: document.getElementById('travel-options'),
-  };
-
-  DOM.statsContainer.innerHTML = `
+  return `
     <div>
       <h2>${getText(state.place.key)}</h2>
       <div>money: ${state.money.toFixed(2)}€</div>
@@ -23,9 +17,7 @@ const renderStats = (state) => {
 const renderTravelOptions = (state) => {
   const getText = getTranslations(state.language);
 
-  const travelActions = getTravelActions(state);
-
-  const optionsHTML = travelActions
+  const optionsHTML = getTravelActions(state)
     .map(
       (action) => `
       <button ${on('click', () =>
@@ -35,36 +27,32 @@ const renderTravelOptions = (state) => {
     )
     .join('');
 
-  DOM.travelOptions.innerHTML = `
+  return `
     <h4>${getText('travel')}</h4>
     ${optionsHTML}
-      `;
+   `;
 };
 
 const renderActions = (state) => {
   const getText = getTranslations(state.language);
 
-  const buttonText = (action) => {
-    return getText(action.key) || action.key;
-  };
 
-  const actions = getActions(state).filter(action => action.enabledAt.includes(state.place.key));
-
-  const optionsHTML = actions
+  const optionsHTML = getActions(state)
+    .filter(action => action.enabledAt.includes(state.place.key))
     .map(
       (action) => `
     <button
       ${on('click', () => {
         processAction(state)(action);
       })}
-      >${buttonText(action)}</button >`
+      >${getText(action.key)}</button >`
     )
     .join('');
 
-  DOM.actionsContainer.innerHTML = `
-  <h4> ${getText('actions')}</h4>
-  ${optionsHTML}
-`;
+  return `
+    <h4> ${getText('actions')}</h4>
+    ${optionsHTML}
+  `;
 };
 
 const renderInventory = (state) => {
@@ -89,15 +77,16 @@ ${actions.map(action => `
   </div >
     `).join('');
 
-  DOM.inventory.innerHTML = `
-  <h4> ${getText('inventory')}</h4>
-  ${itemsHTML}`;
+  return `
+    <h4>${getText('inventory')}</h4>
+    ${itemsHTML}`;
 };
 
-const render = (state) =>
-  [
+const render = ((container) => (state) => {
+  container.innerHTML = [
     renderStats,
-    renderActions,
-    renderTravelOptions,
     renderInventory,
-  ].forEach((fn) => fn(state));
+    renderTravelOptions,
+    renderActions,
+  ].map(fn => fn(state)).join('');
+})(document.getElementById('game'));
