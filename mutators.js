@@ -22,7 +22,7 @@ const mutators = {
 
     const receivedCalories = getReceivedCaloriesForDuration(state)(action.duration);
 
-    state.energy = Math.min(300, state.energy + receivedCalories);
+    state.energy = Math.min(MAX_ENERGY_RESERVE, state.energy + receivedCalories);
 
     state.stomach = state.stomach.filter(
       (item) => item.startTime + item.digestDuration > actionEndTime
@@ -30,6 +30,7 @@ const mutators = {
   },
   advanceDynamicProperties: (action) => (state) => {
     state.energy -= action.power * action.duration;
+
     state.mentalRecovery += (action.mentalRecovery || IDLE_MENTAL_RECOVERY_DRAIN) * action.duration;
   },
   setPlace: (place) => (state) => (state.place = place),

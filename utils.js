@@ -1,5 +1,6 @@
 const pad = (num) => ((num + '').length == 2 ? num : '0' + num);
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+const isBetween = (min, max, value) => value >= min && value <= max;
 const distance = ([aX, aY], [bX, bY]) =>
   ((aX - bX) ** 2 + (aY - bY) ** 2) ** 0.5;
 const distanceToPlace = (place) => (state) =>
@@ -19,6 +20,11 @@ const formats = {
     const minutes = Math.floor(time / (1000 * 60)) % 60;
     return `${pad(hours)}:${pad(minutes)}`;
   },
+  duration: time => {
+    const hours = Math.floor(time / (1000 * 60 * 60)) % 24;
+    const minutes = Math.floor(time / (1000 * 60)) % 60;
+    return `${hours > 0 ? hours + 'h ' : ''}${minutes}min`;
+  }
 };
 
 const cloneItem = (item) => ({

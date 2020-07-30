@@ -4,12 +4,14 @@ const renderStats = (state) => {
   return `
     <div>
       <h2>${getText(state.place.key)}</h2>
+      <p>${getPlaceDescription(state.place)}</p>
       <div>money: ${state.money.toFixed(2)}€</div>
+      <div>awareness: ${formats.percent(getAwareness(state))}</div>
       <div>mental recovery: ${formats.percent(state.mentalRecovery)}</div>
       <div>energy: ${state.energy.toFixed(0)} cal</div>
       <div>stomach: ${state.stomach.length}</div>
       <div>day: ${formats.date(state.time)}</div>
-      <div>time: ${formats.time(state.time)}</div>
+      <div>time: ${formats.time(state.time)} weekd: ${getWeekDay(state)}</div>
     </div>
   `;
 };
@@ -20,9 +22,12 @@ const renderTravelOptions = (state) => {
   const optionsHTML = getTravelActions(state)
     .map(
       (action) => `
-      <button ${on('click', () =>
+      <button
+        ${on('click', () =>
         processAction(state)(action)
-      )}>${getText(action.place.key)}</button>
+      )}
+        title="${getTravelActionDescription(action)}"
+      >${getText(action.place.key)}</button>
 `
     )
     .join('');
@@ -36,16 +41,19 @@ const renderTravelOptions = (state) => {
 const renderActions = (state) => {
   const getText = getTranslations(state.language);
 
-
   const optionsHTML = getActions(state)
     .filter(action => action.enabledAt.includes(state.place.key))
     .map(
       (action) => `
-    <button
-      ${on('click', () => {
+      <button
+        title="${action.description ?? getActionDescription(action)}"
+        ${action.disabled && 'disabled'}
+        ${on('click', () => {
         processAction(state)(action);
       })}
-      >${getText(action.key)}</button >`
+      >
+        ${(action.textKeys ?? [action.key]).map(getText).join(' ')}
+      </button >`
     )
     .join('');
 
@@ -72,9 +80,15 @@ const renderInventory = (state) => {
   <div>
     <span>${getText(item.key)}</span>
 ${actions.map(action => `
-      <button ${on('click', () => processAction(state)(action))} >${getText(action.textKey || action.key)}</button>
+      <button
+        ${on('click', () => processAction(state)(action))}
+        title="${getActionDescription(action)}"
+        ${action.disabled && 'disabled'}
+      >
+        ${getText(action.textKey || action.key)}
+      </button>
     `).join('')}
-  </div >
+  </div>
     `).join('');
 
   return `
